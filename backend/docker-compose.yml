@@ -1,0 +1,23 @@
+version: '3.9'
+
+services:
+  db:
+    container_name: stockit_db
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5433:5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+      - ./init_scripts:/docker-entrypoint-initdb.d
+  rabbitmq:
+    container_name: stockit_rabbitmq
+    image: rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbitmq
+      RABBITMQ_DEFAULT_PASS: rabbitmq

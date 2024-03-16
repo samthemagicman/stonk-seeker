@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+
 import pika
 from termcolor import colored
 import database
@@ -18,6 +20,7 @@ stockSymbols = {
     "Super Micro Computer": "smci",
 }
 
+# Can update this to use the NASDAQ CSV file https://www.nasdaq.com/market-activity/stocks/screener?exchange=NASDAQ&render=download
 def get_stock_info(symbol):
     response = urllib3.request("GET", f'https://query2.finance.yahoo.com/v1/finance/search?q={symbol}')
     content = response.data
@@ -55,6 +58,7 @@ def process_tickers(ch, method, properties, body: bytes):
     stocks: list[str] = bodyObj["stocks"]
     comment_id = bodyObj["comment_id"]
     comment = bodyObj["comment"]
+    time = bodyObj["time"]
     print(f"Checking stock: {colored(stocks, 'green')}")
 
     for stock in stocks:
@@ -78,7 +82,7 @@ def process_tickers(ch, method, properties, body: bytes):
             print(f"Received ticker: {colored(symbols, 'green')}")
 
     try:
-        database.create_stock_mention(comment_id, symbols, shortnames)
+        database.create_stock_mention(comment_id, symbols, shortnames, datetime.utcfromtimestamp(time))
     except Exception as e:
         print(colored(f"Failed to create stock mention: {e}", "red"))
 

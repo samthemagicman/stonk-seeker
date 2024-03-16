@@ -70,9 +70,13 @@ export async function loader() {
    *   ORDER BY (count(*)) DESC;
    */
   const topStocks = await db
-    .selectFrom("top_stock_mentions_24hr")
+    .selectFrom("stock_mentions")
+    .select(({fn}) => ["symbol", fn.countAll().as("mentions")])
+    .where("created_at", ">", sql`(CURRENT_TIMESTAMP - interval '1 day')`)
+    .groupBy("symbol")
+    .orderBy("mentions", "desc")
+    // .orderBy("latest_mention", "desc")
     .limit(10)
-    .selectAll()
     .execute();
 
   const chartData = await db
@@ -84,8 +88,7 @@ export async function loader() {
       "sm.symbol as name",
       eb.fn.countAll<number>().as("amount"),
     ])
-    .where("sm.symbol", "=", "BA")
-    .where("sm.created_at", ">", sql`(CURRENT_TIMESTAMP - interval '1 day')`)
+    .where("sm.symbol", "=", "TSLA")
     .where("sm.created_at", ">", sql`(CURRENT_TIMESTAMP - interval '1 day')`)
     .groupBy(() => [
       sql`date_trunc('hour', sm.created_at) + (((date_part('minute', sm.created_at)::integer / 10) * 10) || ' minutes')::interval`,

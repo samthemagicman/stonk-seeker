@@ -1,11 +1,11 @@
 -- Might be worth changing to MATERIALIZED VIEW for performance
-CREATE VIEW top_stock_mentions AS
-    SELECT symbol, COUNT(*) as mentions
-    FROM public.stock_mentions
-    WHERE created_at > CURRENT_TIMESTAMP - INTERVAL '1 day'
-    GROUP BY symbol
-    ORDER BY mentions DESC, latest_mention DESC
-    LIMIT 10;
+-- CREATE VIEW top_stock_mentions AS
+--     SELECT symbol, COUNT(*) as mentions
+--     FROM public.stock_mentions
+--     WHERE created_at > CURRENT_TIMESTAMP - INTERVAL '1 day'
+--     GROUP BY symbol
+--     ORDER BY mentions DESC, latest_mention DESC
+--     LIMIT 10;
 
 CREATE OR REPLACE FUNCTION get_comments_for_symbol(symbol_name text)
 RETURNS TABLE(body text, created_at timestamp with time zone) AS $$

@@ -19,6 +19,7 @@ def process_comments(ch, method, properties, body: bytes):
     comment = commentObj["comment"]
     comment_id = commentObj["comment_id"]
     post_id = commentObj["post_id"]
+    time = commentObj["time"]
 
     print(colored(f"Processing new comment {comment}", "blue"))
     doc = nlp(comment)
@@ -36,7 +37,8 @@ def process_comments(ch, method, properties, body: bytes):
                 "stocks": stocks,
                 "post_id": post_id,
                 "comment_id": comment_id,
-                "comment": comment
+                "comment": comment,
+                "time": time
             }
         ))
 

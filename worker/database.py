@@ -57,6 +57,8 @@ def get_or_create_post(id: str, link: str, subreddit_id: str) -> str:
 def comment_exists(comment_id: str) -> bool:
     return conn.execute("SELECT * FROM comments WHERE id = %s", (comment_id,), prepare=True).fetchone() is not None
 
+def post_exists(post_id: str) -> bool:
+    return conn.execute("SELECT * FROM posts WHERE id = %s", (post_id,), prepare=True).fetchone() is not None
 
 def create_comment(id: str, body: str, post_id: str, permalink: str, created_at) -> str:
     cur = conn.execute("INSERT INTO comments (id, body, post_id, permalink, created_at) VALUES (%s, %s, %s, %s, %s)", (id, body, post_id, permalink, created_at), prepare=True)
@@ -66,10 +68,10 @@ def create_comment(id: str, body: str, post_id: str, permalink: str, created_at)
     return id
 
 
-def create_stock_mention(comment_id: str, symbols: list[str], company_names: list[str]):
+def create_stock_mention(comment_id: str, symbols: list[str], company_names: list[str], created_at):
     cur = conn.cursor()
     for i, symbol in enumerate(symbols):
-        cur.execute("INSERT INTO stock_mentions (comment_id, symbol, company_name) VALUES (%s, %s, %s)", (comment_id, symbol, company_names[i]))
+        cur.execute("INSERT INTO stock_mentions (comment_id, symbol, company_name, created_at) VALUES (%s, %s, %s, %s)", (comment_id, symbol, company_names[i], created_at))
     if (cur.rowcount == 0):
         raise Exception("Failed to create stock mention")
     conn.commit()

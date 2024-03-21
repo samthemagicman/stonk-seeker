@@ -6,95 +6,96 @@
 
 /** @type {import('eslint').Linter.Config} */
 module.exports = {
-  root: true,
-  parserOptions: {
-    ecmaVersion: "latest",
-    sourceType: "module",
-    ecmaFeatures: {
-      jsx: true,
+    root: true,
+    parserOptions: {
+        ecmaVersion: "latest",
+        sourceType: "module",
+        ecmaFeatures: {
+            jsx: true,
+        },
     },
-  },
-  env: {
-    browser: true,
-    commonjs: true,
-    es6: true,
-  },
-
-  // Base config
-  extends: ["eslint:recommended"],
-
-  overrides: [
-    // React
-    {
-      files: ["**/*.{js,jsx,ts,tsx}"],
-      plugins: ["react", "jsx-a11y", "import"],
-      extends: [
-        "plugin:react/recommended",
-        "plugin:react/jsx-runtime",
-        "plugin:react-hooks/recommended",
-        "plugin:jsx-a11y/recommended",
-      ],
-      settings: {
-        react: {
-          version: "detect",
-        },
-        formComponents: ["Form"],
-        linkComponents: [
-          { name: "Link", linkAttribute: "to" },
-          { name: "NavLink", linkAttribute: "to" },
-        ],
-        "import/resolver": {
-          node: {
-            extensions: [".js", ".jsx", ".ts", ".tsx"],
-          },
-          typescript: {
-            alwaysTryTypes: true,
-          },
-        },
-        "import/parsers": {
-          "@typescript-eslint/parser": [".ts", ".tsx"],
-        },
-      },
-      rules: {
-        "import/no-unresolved": "error",
-      },
+    env: {
+        browser: true,
+        commonjs: true,
+        es6: true,
     },
 
-    // Typescript
-    {
-      files: ["**/*.{ts,tsx}"],
-      plugins: ["@typescript-eslint", "import"],
-      parser: "@typescript-eslint/parser",
-      settings: {
-        "import/internal-regex": "^~/",
-        "import/resolver": {
-          node: {
-            extensions: [".js", ".jsx", ".ts", ".tsx"],
-          },
-          typescript: {
-            alwaysTryTypes: true,
-          },
-        },
-        "import/parsers": {
-          "@typescript-eslint/parser": [".ts", ".tsx"],
-        },
-      },
-      extends: [
-        "plugin:@typescript-eslint/recommended",
-        "plugin:import/recommended",
-        "plugin:import/typescript",
-      ],
-      rules: {
-        "import/no-unresolved": "error",
-      },
-    },
+    // Base config
+    extends: ["eslint:recommended"],
 
-    // Node
-    {
-      files: [".eslintrc.cjs"],
-      env: {
-        node: true,
-      },
-    },
-  ],
+    overrides: [
+        // React
+        {
+            files: ["**/*.{js,jsx,ts,tsx}"],
+            plugins: ["react", "jsx-a11y", "import"],
+            extends: [
+                "plugin:react/recommended",
+                "plugin:react/jsx-runtime",
+                "plugin:react-hooks/recommended",
+                "plugin:jsx-a11y/recommended",
+            ],
+            settings: {
+                react: {
+                    version: "detect",
+                },
+                formComponents: ["Form"],
+                linkComponents: [
+                    {name: "Link", linkAttribute: "to"},
+                    {name: "NavLink", linkAttribute: "to"},
+                ],
+                "import/resolver": {
+                    node: {
+                        extensions: [".js", ".jsx", ".ts", ".tsx"],
+                    },
+                    typescript: {
+                        alwaysTryTypes: true,
+                    },
+                },
+                "import/parsers": {
+                    "@typescript-eslint/parser": [".ts", ".tsx"],
+                },
+            },
+            rules: {
+                "import/no-unresolved": "error",
+            },
+        },
+
+        // Typescript
+        {
+            files: ["**/*.{ts,tsx}"],
+            plugins: ["@typescript-eslint", "import"],
+            parser: "@typescript-eslint/parser",
+            settings: {
+                "import/internal-regex": "^~/",
+                "import/resolver": {
+                    node: {
+                        extensions: [".js", ".jsx", ".ts", ".tsx"],
+                    },
+                    typescript: {
+                        alwaysTryTypes: true,
+                    },
+                },
+                "import/parsers": {
+                    "@typescript-eslint/parser": [".ts", ".tsx"],
+                },
+            },
+            extends: [
+                "plugin:@typescript-eslint/recommended",
+                "plugin:import/recommended",
+                "plugin:import/typescript",
+            ],
+            rules: {
+                "import/no-unresolved": "error",
+                "react/no-unescaped-entities": "off",
+            },
+        },
+
+        // Node
+        {
+            files: [".eslintrc.cjs"],
+            env: {
+                node: true,
+            },
+        },
+    ],
 };

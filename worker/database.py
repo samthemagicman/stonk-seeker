@@ -67,6 +67,12 @@ def create_comment(id: str, body: str, post_id: str, permalink: str, created_at)
     conn.commit()
     return id
 
+def count_post_comments(post_id: str) -> int:
+    cur = conn.execute("SELECT COUNT(*) FROM comments WHERE post_id = (%s)", (post_id,), prepare=True)
+    row = cur.fetchone()
+    if row is None:
+        return 0
+    return row[0]
 
 def create_stock_mention(comment_id: str, symbols: list[str], company_names: list[str], created_at):
     cur = conn.cursor()

@@ -37,7 +37,7 @@ export async function loader() {
                 "symbol",
                 fn.countAll().as("mentions"), "company_name"
             ])
-            .select(sql`(COUNT(*) - prev_mentions)
+            .select(sql`(prev_mentions)
                         AS "change"`)
             .leftJoin((eb) => {
                 return eb.selectFrom("stock_mentions")
@@ -194,11 +194,11 @@ export default function Index() {
             accessorKey: "change",
             header: "Change",
             accessorFn: (row) => {
-                const change = parseInt(row.change || "0");
-                const mentions = parseInt(row.mentions || "0");
-                if (change == 0) return "100%" + `(${change})`;
+                const change = parseInt(row.change ?? "0");
+                const mentions = parseInt(row.mentions ?? "0");
+                if (change == 0) return "100%" + ` (${change})`;
 
-                return `${((mentions / change) * 100).toFixed(2)}%` + `(${change})`;
+                return `${((mentions / change) * 100).toFixed(2)}%` + ` (${change})`;
             }
         },
     ];

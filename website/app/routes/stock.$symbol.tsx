@@ -45,7 +45,7 @@ export async function loader({params}: LoaderFunctionArgs) {
             sql`date_trunc
                 ('hour', created_at)
                 +
-            (((date_part('minute', created_at)::integer / 10) * 10) || ' minutes')
+            (((date_part('minute', created_at)::integer / 60) * 60) || ' minutes')
             ::interval`.as(
                 "time_interval"
             ),
@@ -58,7 +58,7 @@ export async function loader({params}: LoaderFunctionArgs) {
             sql`date_trunc
                 ('hour', sm.created_at)
                 +
-            (((date_part('minute', sm.created_at)::integer / 10) * 10) || ' minutes')
+            (((date_part('minute', sm.created_at)::integer / 60) * 60) || ' minutes')
             ::interval`,
             "sm.symbol",
         ])
@@ -201,7 +201,7 @@ export default function Index() {
                                 domain={[
                                     0,
                                     data.chartData.reduce(
-                                        (max, obj) => Math.max(max, obj.amount),
+                                        (max: number, obj: { amount: number }) => Math.max(max, obj.amount),
                                         -Infinity
                                     ) + 10, // For some reason we have to get this manually. Rechart's way of getting maxData seems to be broken.
                                 ]}
@@ -223,7 +223,7 @@ export default function Index() {
 
             <h2>Comments</h2>
             <ul className="flex flex-col gap-4">
-                {data.comments.map((comment) => (
+                {data.comments.map((comment: { created_at: string, body: string }) => (
                     <li key={comment.created_at} className="p-2 rounded-xl border">
                         {comment.body}
                     </li>

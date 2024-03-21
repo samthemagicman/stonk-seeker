@@ -14,7 +14,7 @@ services:
       - ./init_scripts:/docker-entrypoint-initdb.d
   rabbitmq:
     container_name: stockit_rabbitmq
-    image: rabbitmq
+    image: rabbitmq:management
     expose:
       - 5672
       - 15672

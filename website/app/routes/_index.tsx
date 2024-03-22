@@ -1,6 +1,6 @@
 import { type MetaFunction } from "@remix-run/node";
 import { db } from "~/lib/database.server";
-import { useLoaderData, useRevalidator } from "@remix-run/react";
+import { Link, useLoaderData, useRevalidator } from "@remix-run/react";
 import { useEffect } from "react";
 import {
   ColumnDef,
@@ -17,12 +17,10 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { sql } from "kysely";
+import { buttonVariants } from "~/components/ui/button";
 
 export const meta: MetaFunction = () => {
-  return [
-    { title: "New Remix App" },
-    { name: "description", content: "Welcome to Remix!" },
-  ];
+  return [{ title: "Stonkes" }, { content: "Welcome to Stonkes!" }];
 };
 
 export async function loader() {
@@ -186,6 +184,7 @@ export default function Index() {
     return stock;
   });
 
+  // bad
   const columns: ColumnDef<{
     company_name: string | null;
     rank: string | null;
@@ -205,15 +204,19 @@ export default function Index() {
         /* eslint-disable react/prop-types */ // TODO: upgrade to latest eslint tooling
         const symbol = props.row.original.symbol;
         return (
-          <a className="flex items-center" href={`/stock/${symbol}`}>
-            <div className="flex flex-row gap-3 items-center">
+          <Link
+            prefetch={"intent"}
+            className="flex items-center"
+            to={`/stock/${symbol}`}
+          >
+            <div className="flex flex-row gap-3 items-center text-sky-800">
               {/*<img src={`https://eodhd.com/img/logos/US/${symbol}.png`}*/}
               {/*     className={"h-4 w-4 aspect-square"}*/}
               {/*     alt={"symbol"}*/}
               {/*/>*/}
               <span>{props.cell.getValue()}</span>
             </div>
-          </a>
+          </Link>
         );
       },
     },
@@ -240,7 +243,9 @@ export default function Index() {
 
   useEffect(() => {
     setInterval(() => {
-      revalidator.revalidate();
+      if (document.hasFocus()) {
+        revalidator.revalidate();
+      }
     }, 1000 * 5);
   }, []);
 
@@ -248,18 +253,43 @@ export default function Index() {
     <div className={"flex justify-center"}>
       <div className="flex flex-col m-5 max-w-screen-lg w-full">
         <div className="flex flex-col gap-10 flex-1">
-          <div>
-            <h2 className="text-2xl font-bold tracking-tight">Welcome back!</h2>
+          <div className="text-center">
+            <h2 className="text-2xl font-bold tracking-tight">Welcome!</h2>
             <p className="text-muted-foreground">
-              Here's a list of your tasks for this month!
+              Here's the list of top mentioned stocks on r/WallStreetBets
             </p>
+            <Link
+              className={buttonVariants({
+                variant: "secondary",
+                className: "mt-5",
+              })}
+              to="#how-work"
+            >
+              Learn more
+            </Link>
           </div>
 
           <div className="flex flex-col gap-2">
-            <h3 className="text-lg font-semibold tracking-tight">
-              Top Mentioned Tickers
-            </h3>
+            {/* <h3 className="text-lg font-semibold tracking-tight">
+              Top mentioned Reddit stocks in the last 24 hour
+            </h3> */}
             <DataTable columns={columns} data={data.topStocks} />
+          </div>
+
+          <div className="text-center">
+            <h2 className="text-2xl font-bold tracking-tight" id="how-work">
+              How does it work?
+            </h2>
+            <p className="text-muted-foreground text-left">
+              The server is constantly reading comments. It processes them using
+              natural language processing to get potential company names. The
+              potential company names are then searched through the Yahoo
+              finance API to get the ticker symbols. This is considered 1
+              mention.
+              <br />
+              <br />
+              Still a work in progress.
+            </p>
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { cssBundleHref } from "@remix-run/css-bundle";
 import type { LinksFunction } from "@remix-run/node";
 import stylesheet from "~/tailwind.css";
 import main from "~/main.css";
+import { Analytics } from "@vercel/analytics/react";
 import {
   Links,
   LiveReload,
@@ -27,6 +28,7 @@ export default function App() {
         <Links />
       </head>
       <body>
+        <Analytics />
         <Outlet />
         <ScrollRestoration />
         <Scripts />

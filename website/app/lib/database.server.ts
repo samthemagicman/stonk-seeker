@@ -3,11 +3,11 @@ import pg from "pg";
 import { Kysely, PostgresDialect } from "kysely";
 
 export const pool = new pg.Pool({
-  database: "postgres",
-  host: "localhost",
-  user: "postgres",
-  password: "postgres",
-  port: 5433,
+  database: process.env.POSTGRES_DATABASE,
+  host: process.env.POSTGRES_HOST,
+  user: process.env.POSTGRES_USER,
+  password: process.env.POSTGRES_PASSWORD,
+  port: parseInt(process.env.POSTGRES_PORT ?? "5432"),
   max: 10,
 });
 

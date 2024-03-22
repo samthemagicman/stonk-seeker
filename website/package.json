@@ -6,10 +6,23 @@
   "scripts": {
     "build": "remix build",
     "codegen": "kysely-codegen",
-    "dev": "remix dev --manual",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "remix-serve ./build/index.js",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "icons": "npx @svgr/cli --out-dir app/components/icons -- app/icons",
+    "icons:watch": "npm-watch icons",
+    "dev:svg": "run-s icons icons:watch",
+    "dev:remix": "remix dev",
+    "dev": "run-p dev:*"
+  },
+  "watch": {
+    "icons": {
+      "patterns": [
+        "icons"
+      ],
+      "extensions": "svg",
+      "quiet": false
+    }
   },
   "dependencies": {
     "@lucia-auth/adapter-postgresql": "^3.1.0",
@@ -36,6 +49,10 @@
   },
   "devDependencies": {
     "@remix-run/dev": "^2.8.0",
+    "@svgr/cli": "^8.1.0",
+    "@svgr/plugin-jsx": "^8.1.0",
+    "@svgr/plugin-prettier": "^8.1.0",
+    "@svgr/plugin-svgo": "^8.1.0",
     "@types/react": "^18.2.20",
     "@types/react-dom": "^18.2.7",
     "@typescript-eslint/eslint-plugin": "^6.7.4",
@@ -48,6 +65,8 @@
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "kysely-codegen": "^0.11.0",
+    "npm-run-all": "^4.1.5",
+    "npm-watch": "^0.11.0",
     "tailwindcss": "^3.4.1",
     "typescript": "^5.3.3"
   },

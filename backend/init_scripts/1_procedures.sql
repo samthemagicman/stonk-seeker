@@ -20,7 +20,6 @@ BEGIN
 END; $$
 LANGUAGE plpgsql;
 
-DROP FUNCTION get_mentions_by_symbol(symbol_param text);
 CREATE OR REPLACE FUNCTION get_mentions_by_symbol(symbol_param TEXT)
 RETURNS TABLE (
     time_interval TIMESTAMPTZ,

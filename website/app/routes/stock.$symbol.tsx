@@ -75,15 +75,6 @@ export async function loader({ params }: LoaderFunctionArgs) {
 
 export default function Index() {
   const data = useLoaderData<typeof loader>();
-  const revalidator = useRevalidator();
-
-  useEffect(() => {
-    setInterval(() => {
-      if (document.hasFocus()) {
-        revalidator.revalidate();
-      }
-    }, 1000 * 5);
-  }, []);
 
   return (
     <div className="flex flex-col m-5">

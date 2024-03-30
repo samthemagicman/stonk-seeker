@@ -18,14 +18,15 @@ import {
 } from "~/components/ui/table";
 import { sql } from "kysely";
 import { buttonVariants } from "~/components/ui/button";
+import {pool} from "~/lib/db"
 
 export const meta: MetaFunction = () => {
   return [{ title: "Stonkes" }, { content: "Welcome to Stonkes!" }];
 };
 
-export const headers: HeadersFunction = () => ({
-  "Cache-Control": "public, s-maxage=1800",
-});
+// export const headers: HeadersFunction = () => ({
+//   "Cache-Control": process.env.NODE_ENV === "production" ? "public, s-maxage=1800" : "no-store",
+// });
 
 export async function loader() {
   // const topStocks = await db
@@ -45,55 +46,93 @@ export async function loader() {
   //     .execute();
 
   //  TODO: Swap all this nonsense to Slonik
-  const topStocks = await db
-    .selectFrom((eb) =>
-      eb
-        .selectFrom("stock_mentions")
-        .select(({ fn }) => [
-          "symbol",
-          fn.countAll().as("mentions"),
-          "company_name",
-        ])
-        .select(
-          sql`(prev_mentions)
-                        AS "change"`
-        )
-        .leftJoin(
-          (eb) => {
-            return eb
-              .selectFrom("stock_mentions")
-              .select((eb) => [
-                "symbol as symbol2",
-                eb.fn.countAll().as("prev_mentions"),
-              ])
-              .where(
-                "created_at",
-                "between",
-                sql`(CURRENT_TIMESTAMP - interval '2 day')
-                                                        AND CURRENT_TIMESTAMP - interval '1 day'`
-              )
-              .groupBy("symbol")
-              .as("prev_mentions_table");
-          },
-          "stock_mentions.symbol",
-          "prev_mentions_table.symbol2"
-        )
-        .where("created_at", ">", sql`(CURRENT_TIMESTAMP - interval '1 day')`)
-        .groupBy("symbol")
-        .groupBy("company_name")
-        .orderBy("mentions", "desc")
-        .groupBy("prev_mentions")
-        // .orderBy("latest_mention", "desc")
-        .limit(100)
-    )
-    .selectAll()
-    .select(({ fn }) =>
-      fn
-        .agg<string[]>("ROW_NUMBER")
-        .over((eb) => eb.orderBy("mentions", "desc"))
-        .as("rank")
-    )
-    .execute();
+  const topStocks = await pool.query(`
+  SELECT
+  *,
+  ROW_NUMBER() OVER (
+    ORDER BY
+      "mentions" DESC
+  ) AS "rank"
+FROM
+  (
+    SELECT
+      "symbol",
+      count(*) AS "mentions",
+      "company_name",
+      (prev_mentions) AS "change"
+    FROM
+      "stock_mentions"
+      LEFT JOIN (
+        SELECT
+          "symbol" AS "symbol2",
+          count(*) AS "prev_mentions"
+        FROM
+          "stock_mentions"
+        WHERE
+          "created_at" BETWEEN (CURRENT_TIMESTAMP - interval '2 day') AND CURRENT_TIMESTAMP  - interval '1 day'
+        GROUP BY
+          "symbol"
+      ) AS "prev_mentions_table" ON "stock_mentions"."symbol" = "prev_mentions_table"."symbol2"
+    WHERE
+      "created_at" > (CURRENT_TIMESTAMP - interval '1 day')
+    GROUP BY
+      "symbol",
+      "company_name",
+      "prev_mentions"
+    ORDER BY
+      "mentions" DESC
+    LIMIT 100
+  ) AS "top_stocks"
+  `);
+  // const topStocks = await db
+  //   .selectFrom((eb) =>
+  //     eb
+  //       .selectFrom("stock_mentions")
+  //       .select(({ fn }) => [
+  //         "symbol",
+  //         fn.countAll().as("mentions"),
+  //         "company_name",
+  //       ])
+  //       .select(
+  //         sql`(prev_mentions)
+  //                       AS "change"`
+  //       )
+  //       .leftJoin(
+  //         (eb) => {
+  //           return eb
+  //             .selectFrom("stock_mentions")
+  //             .select((eb) => [
+  //               "symbol as symbol2",
+  //               eb.fn.countAll().as("prev_mentions"),
+  //             ])
+  //             .where(
+  //               "created_at",
+  //               "between",
+  //               sql`(CURRENT_TIMESTAMP - interval '2 day')
+  //                                                       AND CURRENT_TIMESTAMP - interval '1 day'`
+  //             )
+  //             .groupBy("symbol")
+  //             .as("prev_mentions_table");
+  //         },
+  //         "stock_mentions.symbol",
+  //         "prev_mentions_table.symbol2"
+  //       )
+  //       .where("created_at", ">", sql`(CURRENT_TIMESTAMP - interval '1 day')`)
+  //       .groupBy("symbol")
+  //       .groupBy("company_name")
+  //       .orderBy("mentions", "desc")
+  //       .groupBy("prev_mentions")
+  //       // .orderBy("latest_mention", "desc")
+  //       .limit(100)
+  //   )
+  //   .selectAll()
+  //   .select(({ fn }) =>
+  //     fn
+  //       .agg<string[]>("ROW_NUMBER")
+  //       .over((eb) => eb.orderBy("mentions", "desc"))
+  //       .as("rank")
+  //   )
+  //   .execute();
 
   // const topStocks = await db
   //     .selectFrom("stock_mentions")
@@ -114,7 +153,7 @@ export async function loader() {
   //     .limit(100)
   //     .execute();
 
-  return { topStocks };
+  return { topStocks: topStocks.rows };
 }
 
 interface DataTableProps<TData, TValue> {
@@ -244,14 +283,6 @@ export default function Index() {
       },
     },
   ];
-
-  useEffect(() => {
-    setInterval(() => {
-      if (document.hasFocus()) {
-        revalidator.revalidate();
-      }
-    }, 1000 * 5);
-  }, []);
 
   return (
     <div className={"flex justify-center"}>

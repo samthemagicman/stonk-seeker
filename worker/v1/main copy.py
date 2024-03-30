@@ -1,5 +1,5 @@
 from functools import lru_cache
-
+from joblib import Memory
 import praw
 import spacy
 import urllib3
@@ -21,7 +21,10 @@ def get_mentioned_stocks(comment: str):
             stocks.append(stock)
     return stocks
 
-@lru_cache(maxsize=10000)
+memory = Memory("./cache", verbose=0)
+# @lru_cache(maxsize=10000)
+@lru_cache(maxsize=None)
+@memory.cache
 def get_stock_info(symbol):
     response = urllib3.request("GET", f'https://query2.finance.yahoo.com/v1/finance/search?q={symbol}')
     content = response.data
@@ -66,7 +69,7 @@ def start():
         # first get all the submissions and put them in the comments array
         for submission in subreddit.hot(limit=1000):
             submissions.append(submission)
-            print("Getting submissions", len(submissions))
+            #print("Getting submissions", len(submissions))
         print("Total submissions", len(submissions))
         # now process the submissions and get their comments
         for submission in submissions:
@@ -92,7 +95,7 @@ def start():
                         processed += 1
                         if len(symbols) > 0: # We won't bother inserting comments that have no mentions
                             processed_comments.append((subreddit_id, submission.id, comment.id, comment.body, comment.permalink, symbols, names))
-                        print(f"Processed {processed}/{num_to_process}")
+                        #print(f"Processed {processed}/{num_to_process}")
                     except Exception as e:
                         print(f"Exception occurred for comment {comment.id}: {e}\n\t{comment.body}, {comment.id}")
             print(f"Inserting {len(processed_comments)}")
@@ -104,4 +107,4 @@ def start():
 print("Starting")
 while True:
     start()
-    time.sleep(60 * 60)
+    time.sleep(60 * 30)

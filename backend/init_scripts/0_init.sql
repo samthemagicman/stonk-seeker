@@ -15,7 +15,7 @@ DROP TABLE IF EXISTS public.posts;
 
 CREATE TABLE IF NOT EXISTS public.posts
 (
-    id text NOT NULL,
+    id text NOT NULL UNIQUE,
     link text NOT NULL,
     subreddit_id text NOT NULL,
     PRIMARY KEY (id)
@@ -25,7 +25,7 @@ DROP TABLE IF EXISTS public.comments;
 
 CREATE TABLE IF NOT EXISTS public.comments
 (
-    id text NOT NULL,
+    id text NOT NULL UNIQUE,
     post_id text NOT NULL,
     body text NOT NULL,
     created_at timestamp with time zone NOT NULL DEFAULT NOW(),
@@ -49,7 +49,7 @@ DROP TABLE IF EXISTS public.subreddits;
 
 CREATE TABLE IF NOT EXISTS public.subreddits
 (
-    id text NOT NULL,
+    id text NOT NULL UNIQUE,
     name text,
     PRIMARY KEY (id),
     UNIQUE (name)

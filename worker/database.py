@@ -1,8 +1,7 @@
 import psycopg
 from psycopg.types import datetime
 
-conn = psycopg.connect("postgresql://postgres:postgres@localhost:5433/postgres")
-
+conn = psycopg.connect("postgres://postgres:postgres@localhost:5433/postgres")
 
 class CommentExistsError(Exception):
     pass
@@ -25,6 +24,57 @@ def create_subreddit(name: str) -> str:
         subreddit = cur.fetchone()
         conn.commit()
     return subreddit[0]
+
+
+def create_subreddit2(name: str) -> str:
+    """
+    This function is used to create a new subreddit in the database.
+
+    Parameters:
+    name (str): The name of the subreddit to be created.
+
+    Returns:
+    int: The id of the newly created subreddit.
+    """
+    query = """
+                WITH ins AS (
+                    INSERT INTO subreddits (name)
+                    SELECT '%(name)s'
+                    WHERE NOT EXISTS (
+                        SELECT 1
+                        FROM subreddits
+                        WHERE name = '%(name)s'
+                    )
+                    RETURNING id
+                )
+                SELECT id FROM subreddits WHERE name = '%(name)s'
+                UNION ALL
+                SELECT id FROM ins;
+            """
+    cur = conn.execute(query, {'name': name}, prepare=True)
+    subreddit = cur.fetchone()
+    conn.commit()
+    return subreddit[0]
+
+
+def create_mentions_data(
+        post_id: str,
+        comment_id: str,
+        comment_body: str,
+        comment_permalink: str,
+        symbols: list[str],
+        companies: list[str]
+):
+    cur = conn.execute("CALL insert_post_comment_and_mentions (%s::text, %s::text, %s::text, %s::text, %s, %s)", (comment_id, post_id, comment_body, comment_permalink, symbols, companies))
+    conn.commit()
+
+def create_many_mentions_data(
+        data: list[(str, str, str, str, list[str], list[str])]
+):
+    cur = conn.cursor()
+    for comment in data:
+        cur.execute("CALL insert_post_comment_and_mentions (%s::text, %s::text, %s::text, %s::text, %s, %s)", comment)
+    conn.commit()
 
 
 def create_post(id: str, link: str, subreddit_id: str):

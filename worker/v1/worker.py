@@ -1,3 +1,4 @@
+from datetime import time
 from functools import lru_cache
 
 import praw
@@ -55,8 +56,8 @@ def get_symbols_from_comment(comment: str):
 
 try:
     subreddit_name = "wallstreetbets"
-    subreddit_id = database.create_subreddit(subreddit_name)
     subreddit: models.Subreddit = reddit.subreddit(subreddit_name)
+    subreddit_id = database.create_subreddit(subreddit.id, subreddit_name)
 
     submission: praw.reddit.Submission
     submissions = []
@@ -90,7 +91,7 @@ try:
                     print(symbols, names)
                     processed += 1
                     if len(symbols) > 0: # We won't bother inserting comments that have no mentions
-                        processed_comments.append((submission.id, comment.id, comment.body, comment.permalink, symbols, names))
+                        processed_comments.append((subreddit_id, submission.id, comment.id, comment.body, comment.permalink, symbols, names))
                     print(f"Processed {processed}/{num_to_process}")
                 except Exception as e:
                     print(f"Exception occurred for comment {comment.id}: {e}\n\t{comment.body}, {comment.id}")

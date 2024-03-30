@@ -7,7 +7,7 @@ class CommentExistsError(Exception):
     pass
 
 
-def create_subreddit(name: str) -> str:
+def create_subreddit(id: str, name: str) -> str:
     """
     This function is used to create a new subreddit in the database.
 
@@ -17,10 +17,10 @@ def create_subreddit(name: str) -> str:
     Returns:
     int: The id of the newly created subreddit.
     """
-    cur = conn.execute("SELECT id FROM subreddits WHERE name = %s", (name,), prepare=True)
+    cur = conn.execute("SELECT id FROM subreddits WHERE id = %s", (id,), prepare=True)
     subreddit = cur.fetchone()
     if subreddit is None:
-        cur = conn.execute("INSERT INTO subreddits (name) VALUES (%s) RETURNING id", (name,), prepare=True)
+        cur = conn.execute("INSERT INTO subreddits (id, name) VALUES (%s, %s) RETURNING id", (id, name,), prepare=True)
         subreddit = cur.fetchone()
         conn.commit()
     return subreddit[0]
@@ -68,12 +68,15 @@ def create_mentions_data(
     cur = conn.execute("CALL insert_post_comment_and_mentions (%s::text, %s::text, %s::text, %s::text, %s, %s)", (comment_id, post_id, comment_body, comment_permalink, symbols, companies))
     conn.commit()
 
+# Create a function that takes a list of tuples and inserts them into the database
+# The arguments to the function should be the list of tuples in the format:
+# [(comment_id, post_id, comment_body, comment_permalink, symbols, company_names), ...]
 def create_many_mentions_data(
-        data: list[(str, str, str, str, list[str], list[str])]
+        data: list[(str, str, str, str, str, list[str], list[str])]
 ):
     cur = conn.cursor()
     for comment in data:
-        cur.execute("CALL insert_post_comment_and_mentions (%s::text, %s::text, %s::text, %s::text, %s, %s)", comment)
+        cur.execute("CALL insert_post_comment_and_mentions (%s, %s::text, %s::text, %s::text, %s::text, %s, %s)", comment)
     conn.commit()
 
 

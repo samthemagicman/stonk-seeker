@@ -47,3 +47,43 @@ BEGIN
         count(*) DESC;
 END;
 $$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE PROCEDURE insert_post_comment_and_mentions(
+    IN p_subreddit_id TEXT,
+    IN p_post_id TEXT,
+    IN p_comment_id TEXT,
+    IN p_body TEXT,
+    IN p_permalink TEXT,
+    IN p_symbols TEXT[],
+    IN p_company_names TEXT[]
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    comment_inserted BOOLEAN := FALSE;
+BEGIN
+    -- First, attempt to insert the post if it doesn't exist
+    INSERT INTO public.posts (id, link, subreddit_id)
+        VALUES (p_post_id, p_permalink, p_subreddit_id)
+        ON CONFLICT DO NOTHING;
+
+    -- Attempt to insert the comment along with the post
+    BEGIN
+        INSERT INTO public.comments (id, post_id, body, permalink, created_at)
+        VALUES (p_comment_id, p_post_id, p_body, p_permalink, NOW());
+
+        comment_inserted := TRUE;
+
+        -- the comment was inserted for the first time, so insert stock mentions
+        INSERT INTO public.stock_mentions (comment_id, symbol, company_name, created_at)
+        SELECT p_comment_id, symbol, company_name, NOW()
+        FROM unnest(p_symbols) AS symbol,
+             unnest(p_company_names) AS company_name;
+
+        RAISE NOTICE 'Comment insertion succeeded';
+    EXCEPTION WHEN unique_violation THEN
+        RAISE NOTICE 'Comment insertion failed: Comment already exists';
+    END;
+END $$;

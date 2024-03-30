@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.posts
 (
     id text NOT NULL,
     link text NOT NULL,
-    subreddit_id integer NOT NULL,
+    subreddit_id text NOT NULL,
     PRIMARY KEY (id)
 );
 
@@ -49,7 +49,7 @@ DROP TABLE IF EXISTS public.subreddits;
 
 CREATE TABLE IF NOT EXISTS public.subreddits
 (
-    id serial NOT NULL,
+    id text NOT NULL,
     name text,
     PRIMARY KEY (id),
     UNIQUE (name)

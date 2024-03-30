@@ -12,9 +12,9 @@ services:
     volumes:
       - ./data:/var/lib/postgresql/data
       - ./init_scripts:/docker-entrypoint-initdb.d
-  init:
-    image: python:latest
-    volumes:
-      - ./migration.py:migration.py
-    entrypoint:
-      - "python migration.py"
+  # init:
+  #   image: python:latest
+  #   volumes:
+  #     - ./migration.py:migration.py
+  #   entrypoint:
+  #     - "python migration.py"

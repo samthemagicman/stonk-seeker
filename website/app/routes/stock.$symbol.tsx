@@ -1,4 +1,4 @@
-import { type MetaFunction } from "@remix-run/node";
+import { HeadersFunction, type MetaFunction } from "@remix-run/node";
 import { db } from "~/lib/database.server";
 import { Link, useLoaderData, useRevalidator } from "@remix-run/react";
 import { useEffect } from "react";
@@ -14,6 +14,10 @@ import {
 import { LoaderFunctionArgs, redirect } from "@remix-run/router";
 import { buttonVariants } from "~/components/ui/button";
 import { HomeIcon } from "@radix-ui/react-icons";
+
+export const headers: HeadersFunction = () => ({
+  "Cache-Control": "public, s-maxage=1800",
+});
 
 export async function loader({ params }: LoaderFunctionArgs) {
   let symbol = params.symbol;

@@ -1,4 +1,4 @@
-import { type MetaFunction } from "@remix-run/node";
+import { HeadersFunction, type MetaFunction } from "@remix-run/node";
 import { db } from "~/lib/database.server";
 import { Link, useLoaderData, useRevalidator } from "@remix-run/react";
 import { useEffect } from "react";
@@ -22,6 +22,10 @@ import { buttonVariants } from "~/components/ui/button";
 export const meta: MetaFunction = () => {
   return [{ title: "Stonkes" }, { content: "Welcome to Stonkes!" }];
 };
+
+export const headers: HeadersFunction = () => ({
+  "Cache-Control": "public, s-maxage=1800",
+});
 
 export async function loader() {
   // const topStocks = await db

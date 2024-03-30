@@ -5,6 +5,6 @@ WORKDIR /home/node/app
 COPY . .
 
 RUN npm install
-
-# Build and run npm
+RUN npm run build
+RUN npm run start
 

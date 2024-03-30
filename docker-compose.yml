@@ -1,0 +1,22 @@
+version: '3.9'
+
+services:
+  db:
+    container_name: stockit_db
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5433:5432
+    volumes:
+      - ./backend/data:/var/lib/postgresql/data
+      - ./backend/init_scripts:/docker-entrypoint-initdb.d
+  worker:
+    image: stockit_worker
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+    volumes:
+       - ./worker:/usr/src/app
+    command: >
+      sh -c "python ./v1/main.py"

@@ -1,7 +1,8 @@
 import psycopg
-from psycopg.types import datetime
+import os
 
-conn = psycopg.connect("postgres://postgres:postgres@localhost:5433/postgres")
+conn_str = os.getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5433/postgres")
+conn = psycopg.connect(conn_str)
 
 class CommentExistsError(Exception):
     pass

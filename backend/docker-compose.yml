@@ -12,15 +12,9 @@ services:
     volumes:
       - ./data:/var/lib/postgresql/data
       - ./init_scripts:/docker-entrypoint-initdb.d
-  rabbitmq:
-    container_name: stockit_rabbitmq
-    image: rabbitmq:management
-    expose:
-      - 5672
-      - 15672
-    ports:
-      - 5672:5672
-      - 15672:15672
-    environment:
-      RABBITMQ_DEFAULT_USER: rabbitmq
-      RABBITMQ_DEFAULT_PASS: rabbitmq
+  init:
+    image: python:latest
+    volumes:
+      - ./migration.py:migration.py
+    entrypoint:
+      - "python migration.py"

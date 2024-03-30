@@ -1,4 +1,3 @@
-from datetime import time
 from functools import lru_cache
 
 import praw

@@ -1,7 +1,7 @@
 import psycopg
 import os
 
-conn_str = os.getenv("DATABASE_URL", "postgres://postgres:postgres@localhost:5433/postgres")
+conn_str = os.getenv("DATABASE_URL", "postgres://postgres.gijsepyttxkktikcoicg:rxi3D7*qSRW!UCm@aws-0-us-west-1.pooler.supabase.com:5432/postgres")
 conn = psycopg.connect(conn_str)
 
 class CommentExistsError(Exception):

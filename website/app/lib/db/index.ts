@@ -6,7 +6,7 @@ export const pool = new pg.Pool({
     password: process.env.POSTGRES_PASSWORD,
     database: process.env.POSTGRES_DATABASE,
     port: parseInt(process.env.POSTGRES_PORT ?? "5432"),
-    ssl: process.env.NODE_ENV === "production",
+    // ssl: process.env.NODE_ENV === "production",
 })
 
 

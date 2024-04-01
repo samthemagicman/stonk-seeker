@@ -1,5 +1,5 @@
 #!/bin/bash
-set -xe
+set -e
 
 if [ ! -d "venv" ] && [ ! -d "venv/bin" ]; then
     # If not, create a virtual environment

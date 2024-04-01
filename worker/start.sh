@@ -11,6 +11,9 @@ fi
 source "./venv/bin/activate"
 # Install Python requirements
 pip install -r requirements.txt
-python -m spacy download en_core_web_sm
+# python -m spacy download en_core_web_sm
 # Start Python script as a daemon
-python -u "v1/main copy.py" > output.log &
+
+until python -u "v1/main copy.py" > output.log; do
+    echo "The program crashed at `date +%H:%M:%S`. Restarting the script..."
+done

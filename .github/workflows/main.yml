@@ -13,12 +13,5 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Start Python Daemon
-        run: |
-          #!/bin/bash
-
-          # Stop any existing daemon
-          sudo pkill -f python_daemon.py
-
-          # Start the new daemon
-          nohup ./start_daemon.sh > /dev/null 2>&1 &
+      - name: Start service
+        run: chmod +x ./worker/install/install.sh && ./worker/install/install.sh

@@ -1,0 +1,10 @@
+[Unit]
+Description=Stonkes Worker
+
+[Service]
+Type=simple
+ExecStart=/home/ubuntu/actions-runner/_work/Stockit/Stockit/worker/start.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,6 +1,7 @@
-
 #!/bin/bash
 set -e
+
+touch this_is_a_test.txt
 
 # Check if virtual environment exists
 if [ ! -d "venv" ] && [ ! -d "venv/bin" ]; then

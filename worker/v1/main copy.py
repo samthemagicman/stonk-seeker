@@ -1,5 +1,5 @@
 from functools import lru_cache
-from joblib import Memory
+from cachier import cachier
 import praw
 import spacy
 import urllib3
@@ -21,10 +21,9 @@ def get_mentioned_stocks(comment: str):
             stocks.append(stock)
     return stocks
 
-memory = Memory("./cache", verbose=0)
 # @lru_cache(maxsize=10000)
-@lru_cache(maxsize=None)
-@memory.cache
+# @lru_cache(maxsize=None)
+@cachier()
 def get_stock_info(symbol):
     response = urllib3.request("GET", f'https://query2.finance.yahoo.com/v1/finance/search?q={symbol}')
     content = response.data

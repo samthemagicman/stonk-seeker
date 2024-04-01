@@ -20,9 +20,9 @@ jobs:
       - name: Uninstalling old worker
         run: |
           chmod +x ./worker/uninstall.sh
-          ./worker/uninstall.sh
+          sudo ./worker/uninstall.sh
 
       - name: Installing new worker
         run: |
           chmod +x ./worker/install.sh
-          ./worker/install.sh
+          sudo ./worker/install.sh

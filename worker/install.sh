@@ -25,14 +25,17 @@ chmod +x /usr/local/bin/stonkes-worker.sh
 
 # Copy the .service file to the systemd directory
 cp ./stonkes-worker.service /etc/systemd/system/
+cp ./stonkes-worker.timer /etc/systemd/system/
 
 # Reload systemd to detect the new service
 systemctl daemon-reload
 
 # Enable the service to start on boot
 systemctl enable stonkes-worker.service
+systemctl enable stonkes-worker.timer
 
 # Start the service
 systemctl start stonkes-worker.service
+systemctl start stonkes-worker.timer
 
 echo "Service stonkes-worker.service installed and started successfully"

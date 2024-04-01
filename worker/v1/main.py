@@ -102,7 +102,9 @@ def start():
     except Exception as e:
         print(e)
 
+
+start()
 print("Starting")
-while True:
-    start()
-    time.sleep(60 * 30)
+# while True:
+#     start()
+#     time.sleep(60 * 30)

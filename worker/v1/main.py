@@ -1,4 +1,4 @@
-from functools import lru_cache
+from cachier import cachier
 
 import praw
 import spacy
@@ -21,7 +21,7 @@ def get_mentioned_stocks(comment: str):
             stocks.append(stock)
     return stocks
 
-@lru_cache(maxsize=10000)
+@cachier()
 def get_stock_info(symbol):
     response = urllib3.request("GET", f'https://query2.finance.yahoo.com/v1/finance/search?q={symbol}')
     content = response.data

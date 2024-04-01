@@ -5,6 +5,7 @@ if [ ! -d "venv" ] && [ ! -d "venv/bin" ]; then
 fi
 source "./venv/bin/activate"
 pip install -r requirements.txt
+pip install cachier
 until python -u "v1/main copy.py" > output.log; do
     echo "The program crashed at `date +%H:%M:%S`. Restarting the script..."
 done

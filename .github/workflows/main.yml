@@ -13,5 +13,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Start service
-        run: chmod +x ./worker/install/install.sh && ./worker/install/install.sh
+      - name: Kill old daemon
+        run: sudo pkill -f "main copy.py"
+
+      - name: Start new daemon
+        run: ./worker/start.sh

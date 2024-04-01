@@ -18,15 +18,20 @@ import {
 } from "~/components/ui/table";
 import { sql } from "kysely";
 import { buttonVariants } from "~/components/ui/button";
-import {pool} from "~/lib/db"
+import { pool } from "~/lib/db";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Stonkes" }, { content: "Welcome to Stonkes!" }];
 };
 
-// export const headers: HeadersFunction = () => ({
-//   "Cache-Control": process.env.NODE_ENV === "production" ? "public, s-maxage=1800" : "no-store",
-// });
+export const headers: HeadersFunction = () => ({
+  "Cache-Control":
+    process.env.NODE_ENV === "production"
+      ? "public, s-maxage=1800, max-age=0"
+      : "no-store",
+  "Vercel-CDN-Cache-Control": "max-age=1800",
+  "CDN-Cache-Control": "max-age=1800",
+});
 
 export async function loader() {
   // const topStocks = await db

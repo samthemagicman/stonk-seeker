@@ -16,7 +16,9 @@ import { buttonVariants } from "~/components/ui/button";
 import { HomeIcon } from "@radix-ui/react-icons";
 
 export const headers: HeadersFunction = () => ({
-  "Cache-Control": "public, s-maxage=1800",
+  "Cache-Control": "public, s-maxage=1800, max-age=0",
+  "Vercel-CDN-Cache-Control": "max-age=1800",
+  "CDN-Cache-Control": "max-age=1800",
 });
 
 export async function loader({ params }: LoaderFunctionArgs) {

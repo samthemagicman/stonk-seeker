@@ -17,4 +17,4 @@ jobs:
         run: sudo pkill -f "main copy.py"
 
       - name: Start new daemon
-        run: ./worker/start.sh
+        run: chmod +x ./worker/start.sh && ./worker/start.sh

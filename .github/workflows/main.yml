@@ -25,5 +25,6 @@ jobs:
 
       - name: Installing new worker
         run: |
+          cd worker
           chmod +x ./install.sh
           sudo ./install.sh

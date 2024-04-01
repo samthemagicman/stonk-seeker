@@ -1,4 +1,6 @@
 #!/bin/bash
+set -xe
+
 if [ ! -d "venv" ] && [ ! -d "venv/bin" ]; then
     # If not, create a virtual environment
     python3 -m venv venv

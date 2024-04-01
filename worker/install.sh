@@ -1,4 +1,5 @@
 #!/bin/bash
+set -xe
 
 # Check if the script is being run as root
 if [ "$(id -u)" != "0" ]; then

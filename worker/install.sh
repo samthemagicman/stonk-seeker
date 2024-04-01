@@ -12,12 +12,13 @@ rsync -a ./v1/ /opt/stonkes-worker
 chmod +x /opt/stonkes-worker/install_dependencies.sh
 echo "Installed stock it files to /opt/stonkes-worker"
 echo "Installing dependencies..."
-/opt/stonkes-worker/install_dependencies.sh
+(cd /opt/stonkes-worker && ./install_dependencies.sh)
 echo "Dependencies installed successfully"
 
 echo "Installing stonkes-worker.service..."
 
 cp ./v1/start.sh /usr/local/bin/stonkes-worker.sh
+chmod +x /usr/local/bin/stonkes-worker.sh
 
 #echo "#!/bin/bash" > /usr/local/bin/stonkes-worker.sh
 #echo "python -u \"/opt/stonkes-worker/main.py\"" >> /usr/local/bin/stonkes-worker.sh

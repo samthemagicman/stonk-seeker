@@ -1,0 +1,24 @@
+name: Start Python worker Daemon
+
+on:
+  push:
+    branches:
+      - main # Change this to your main branch name
+
+jobs:
+  start_daemon:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Start Python Daemon
+        run: |
+          #!/bin/bash
+
+          # Stop any existing daemon
+          sudo pkill -f python_daemon.py
+
+          # Start the new daemon
+          nohup ./start_daemon.sh > /dev/null 2>&1 &

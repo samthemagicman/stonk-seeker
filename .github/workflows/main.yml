@@ -14,8 +14,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Kill old daemon
-        run: sudo pkill -f "main copy.py"
+      # - name: Kill old daemon
+      #   run: sudo pkill -f "main copy.py"
 
       - name: Start new daemon
         run: chmod +x ./worker/start.sh && ./worker/start.sh

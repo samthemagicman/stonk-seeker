@@ -79,8 +79,7 @@ BEGIN
         -- the comment was inserted for the first time, so insert stock mentions
         INSERT INTO public.stock_mentions (comment_id, symbol, company_name, created_at)
         SELECT p_comment_id, symbol, company_name, NOW()
-        FROM unnest(p_symbols) AS symbol,
-             unnest(p_company_names) AS company_name;
+        FROM unnest(p_symbols, p_company_names) AS u(symbol, company_name);
 
         RAISE NOTICE 'Comment insertion succeeded';
     EXCEPTION WHEN unique_violation THEN

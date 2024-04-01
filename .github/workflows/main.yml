@@ -17,8 +17,12 @@ jobs:
       # - name: Kill old daemon
       #   run: sudo pkill -f "main copy.py"
 
-      - name: Start new daemon
+      - name: Uninstalling old worker
         run: |
-          pwd
-          chmod +x ./worker/start.sh
-          ./worker/start.sh > test.log &
+          chmod +x ./worker/uninstall.sh
+          ./worker/uninstall.sh
+
+      - name: Installing new worker
+        run: |
+          chmod +x ./worker/install.sh
+          ./worker/install.sh

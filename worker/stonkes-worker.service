@@ -2,8 +2,8 @@
 Description=Stonkes Worker
 
 [Service]
-Type=simple
-ExecStart=/home/ubuntu/actions-runner/_work/Stockit/Stockit/worker/start.sh
+WorkingDirectory=/opt/stonkes-worker
+ExecStart=/usr/local/bin/stonkes-worker.sh
 Restart=always
 
 [Install]

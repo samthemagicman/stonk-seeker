@@ -1,3 +1,5 @@
+from typing import List
+
 from cachier import cachier
 import praw
 import spacy
@@ -7,9 +9,23 @@ import database
 import json
 from util import reddit
 import concurrent.futures
-import time
+import axiom
+import socket
+
+log_client = axiom.Client("xaat-f4b1c238-67fd-445a-b73d-6cf2411399fe", "triple-s-software-sxs6")
+log_dataset = "stonkes_workers"
+hostname = socket.gethostname()
+
+
+def log(event_name: str, events: dict):
+    events["type"] = event_name
+    events["host"] = hostname
+    print(events)
+    log_client.ingest_events(dataset=log_dataset, events=[events])
+
 
 nlp = spacy.load("en_core_web_sm")
+
 
 def get_mentioned_stocks(comment: str):
     doc = nlp(comment)
@@ -55,7 +71,9 @@ def get_symbols_from_comment(comment: str):
             shortnames.append(shortname)
     return symbols, shortnames
 
+
 def start():
+    log("started", {})
     try:
         subreddit_name = "wallstreetbets"
         subreddit: models.Subreddit = reddit.subreddit(subreddit_name)
@@ -95,16 +113,21 @@ def start():
                             processed_comments.append((subreddit_id, submission.id, comment.id, comment.body, comment.permalink, symbols, names))
                         #print(f"Processed {processed}/{num_to_process}")
                     except Exception as e:
+                        log("comment_failed", {
+                            "comment_id": comment.id,
+                            "error": e
+                        })
                         print(f"Exception occurred for comment {comment.id}: {e}\n\t{comment.body}, {comment.id}")
-            print(f"Inserting {len(processed_comments)}")
+            comms_to_insert = len(processed_comments)
+            print(f"Inserting {comms_to_insert}")
             database.create_many_mentions_data(processed_comments)
+            log("comments_inserted", {
+                "amount": comms_to_insert,
+            })
             print(f"Successfully inserted")
     except Exception as e:
         print(e)
 
 
-start()
 print("Starting")
-# while True:
-#     start()
-#     time.sleep(60 * 30)
+start()

@@ -23,7 +23,7 @@ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION get_mentions_by_symbol(symbol_param TEXT)
 RETURNS TABLE (
     time_interval TIMESTAMPTZ,
-    symbol CHARACTER VARYING(5),
+    symbol TEXT,
     mentions BIGINT
 ) AS $$
 BEGIN

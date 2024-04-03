@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS public.stock_mentions
 (
     id serial NOT NULL,
     comment_id text NOT NULL,
-    symbol character varying(5) NOT NULL,
+    symbol text NOT NULL,
     company_name text NOT NULL,
     created_at timestamp with time zone NOT NULL DEFAULT NOW(),
     PRIMARY KEY (id)

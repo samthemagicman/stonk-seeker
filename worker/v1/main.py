@@ -1,16 +1,17 @@
+import time
 from typing import List
-
-from cachier import cachier
+from diskcache import Cache
+from praw import models
+from util import reddit
 import praw
 import spacy
 import urllib3
-from praw import models
 import database
 import json
-from util import reddit
 import concurrent.futures
 import axiom
 import socket
+cache = Cache(directory="./cache")
 
 log_client = axiom.Client("xaat-f4b1c238-67fd-445a-b73d-6cf2411399fe", "triple-s-software-sxs6")
 log_dataset = "stonkes_workers"
@@ -20,14 +21,13 @@ hostname = socket.gethostname()
 def log(event_name: str, events: dict):
     events["type"] = event_name
     events["host"] = hostname
-    print(events)
     log_client.ingest_events(dataset=log_dataset, events=[events])
 
 
 nlp = spacy.load("en_core_web_sm")
 
 
-def get_mentioned_stocks(comment: str):
+def get_mentioned_stocks(comment: str) -> List[str]:
     doc = nlp(comment)
     stocks = []
     for ent in doc.ents:
@@ -36,23 +36,31 @@ def get_mentioned_stocks(comment: str):
             stocks.append(stock)
     return stocks
 
-# @lru_cache(maxsize=10000)
-# @lru_cache(maxsize=None)
-@cachier()
-def get_stock_info(symbol):
-    response = urllib3.request("GET", f'https://query2.finance.yahoo.com/v1/finance/search?q={symbol}')
+
+def get_stock_info(symbol_to_check):
+    if symbol_to_check in cache:
+        # log("symbol_cache", {"symbol": symbol_to_check, "cache_hit": True})
+        sym, name = cache[symbol_to_check]
+        # print("Cache hit")
+        return sym, name
+    else:
+        log("symbol_cache", {"symbol": symbol_to_check, "cache_hit": False})
+    response = urllib3.request("GET", f'https://query2.finance.yahoo.com/v1/finance/search?q={symbol_to_check}')
     content = response.data
+    if response.status == 429:
+        # Wait before sending more requests to finance apy
+        log("finance_api_timeout", {"symbol": symbol_to_check})
+        print("Finance API limit reached. Waiting...")
+        time.sleep(60 * 10)
+        return get_stock_info(symbol_to_check)
     data = json.loads(content.decode('utf8'))
     if 'quotes' in data and len(data['quotes']) > 0 and 'symbol' in data['quotes'][0] and 'shortname' in data['quotes'][0]:
         symbol = str(data['quotes'][0]['symbol'])
         shortname = str(data['quotes'][0]['shortname'])
-        if len(symbol) > 5:
-            symbol = None
-            shortname = None
     else:
         symbol = None
         shortname = None
-
+    cache[symbol_to_check] = (symbol, shortname)
     return symbol, shortname
 
 
@@ -63,10 +71,8 @@ def get_symbols_from_comment(comment: str):
     shortnames: list[str] = []
     symbols: list[str] = []
     for stock in stocks:
-        symbol, shortname = get_stock_info(stock)
-        if stock is None or shortname is None:
-            pass
-        else:
+        symbol, shortname = get_stock_info(stock.lower())
+        if stock is not None and shortname is not None:
             symbols.append(symbol)
             shortnames.append(shortname)
     return symbols, shortnames

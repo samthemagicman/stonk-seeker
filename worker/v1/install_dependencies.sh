@@ -7,7 +7,7 @@ if [ ! -d "venv" ] && [ ! -d "venv/bin" ]; then
 fi
 source "./venv/bin/activate"
 
-pip install pika psycopg psycopg-binary praw cachier spacy
+pip install pika psycopg psycopg-binary praw diskcache spacy
 python -m spacy download en_core_web_sm
 
 # pip install -r requirements.txt

@@ -1,5 +1,5 @@
 # Use an official Python runtime as a parent image
-FROM python:3.9.19-slim
+FROM python:3.11-slim
 
 # Set the working directory in the container to /app
 WORKDIR /usr/src/app
@@ -7,8 +7,14 @@ WORKDIR /usr/src/app
 # Add the current directory contents into the container at /app
 COPY . .
 
-RUN pip install --no-cache-dir -r requirements.txt
+# RUN apt-get update && apt-get upgrade -y && apt-get install rsync -y
+
+# RUN chmod +x ./v1/install_dependencies.sh && ./v1/install_dependencies.sh
+RUN pip install pika psycopg psycopg-binary praw cachier spacy axiom-py
 RUN python -m spacy download en_core_web_sm
+CMD ["python", "-u", "./v1/main.py"]
+
+# RUN chmod +x install.sh && ./install.sh
 
 # Run app.py when the container launches
-CMD ["python", "./v1/main.py"]
+# CMD ["./install.sh"]

@@ -79,7 +79,7 @@ BEGIN
 
         -- the comment was inserted for the first time, so insert stock mentions
         INSERT INTO public.stock_mentions (comment_id, symbol, company_name, created_at)
-        SELECT p_comment_id, symbol, company_name, NOW()
+        SELECT p_comment_id, symbol, company_name, p_timestamp
         FROM unnest(p_symbols, p_company_names) AS u(symbol, company_name);
 
         RAISE NOTICE 'Comment insertion succeeded';

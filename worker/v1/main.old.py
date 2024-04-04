@@ -18,7 +18,7 @@ banned_cache = Cache(directory=settings.banned_cache_location)
 for banned in settings.banned_symbols:
     banned_cache[banned] = True
 
-log_client = axiom.Client(settings.axiom_client_id, settings.axiom_org_id)
+log_client = axiom.Client(settings.axiom_client_id, settings.axiom_client_id)
 
 processed_comments = []
 nlp = spacy.load("en_core_web_sm")
@@ -84,27 +84,13 @@ def get_symbols_from_comment(comment: str):
     return symbols, shortnames
 
 
-def process_comment(comment, subreddit_id, submission_id):
-    try:
-        symbols, names = get_symbols_from_comment(comment.body)
-        if len(symbols) > 0:  # We won't bother inserting comments that have no mentions
-            processed_comments.append(
-                (subreddit_id, submission_id, comment.id, comment.body, comment.permalink, symbols, names))
-    except Exception as e:
-        log("comment_failed", {
-            "comment_id": comment.id,
-            "error": e
-        })
-        print(f"Exception occurred for comment {comment.id}: {e}\n\t{comment.body}, {comment.id}")
-
-
-def process_comments(comments, subreddit_id, submission_id):
+def process_comments(comments, subreddit_id, submission):
     for comment in comments:
         try:
             symbols, names = get_symbols_from_comment(comment.body)
             if len(symbols) > 0:  # We won't bother inserting comments that have no mentions
                 processed_comments.append(
-                    (subreddit_id, submission_id, comment.id, comment.body, comment.permalink, symbols, names))
+                    (subreddit_id, submission.id, comment.id, comment.body, comment.permalink, symbols, names))
         except Exception as e:
             log("comment_failed", {
                 "comment_id": comment.id,
@@ -120,8 +106,7 @@ async def get_comments_from_submission_queue(queue, comment_queue):
             comments = await submission.comments()
             await comments.replace_more(limit=0)
             comments = await comments.list()
-            for comment in comments:
-                comment_queue.put_nowait((comment, submission.id))
+            comment_queue.put_nowait((comments, submission))
             # print(f"Got {len(comments)} comments")
             # queue.put(comments)
         except Exception as e:
@@ -132,9 +117,9 @@ async def get_comments_from_submission_queue(queue, comment_queue):
 
 async def process_comment_queue(comment_queue, subreddit_id, loop):
     while True:
-        (comment, submission_id) = await comment_queue.get()
+        (comments, submission) = await comment_queue.get()
         try:
-            await loop.run_in_executor(pool, process_comment, comment, subreddit_id, submission_id)
+            await loop.run_in_executor(pool, process_comments, comments, subreddit_id, submission)
 
             # with concurrent.futures.ThreadPoolExecutor() as pool:
             #     await loop.run_in_executor(pool, process_comments3, comments, subreddit_id, submission)
@@ -178,6 +163,7 @@ async def bulk_insert_comments():
     for i in range(0, num_comments, settings.db_batch_insert_size):
         batch = processed_comments[i:i + settings.db_batch_insert_size]
         await database.create_many_mentions_data(batch)
+        print(f"Inserted {len(batch)}")
     processed_comments.clear()
 
 
@@ -198,27 +184,25 @@ async def start(subreddit_name):
         start_time = time.time()
         async for submission in subreddit.hot(limit=1000):
             queue.put_nowait(submission)
-        print("Processing comments")
         state_task = asyncio.create_task(print_state(comment_queue, queue))
         await queue.join()
         await comment_queue.join()
 
+        # state_task.cancel()
         cancel_tasks(*get_comments_tasks, *process_comments_tasks, state_task)
 
-        comments_to_insert = len(processed_comments)
         end_time = time.time()
         execution_time = end_time - start_time
-        print("Done getting all comments in {:.2f} seconds".format(execution_time))
-        log("processed_comments", {execution_time: execution_time})
+        print("Done getting all comments: {:.2f} seconds".format(execution_time))
 
-        print(f"Inserting {comments_to_insert} comments")
+        print(f"Inserting comments: {len(processed_comments)}")
         start_time = time.time()
         await bulk_insert_comments()
         end_time = time.time()
         execution_time = end_time - start_time
-        print("Database insertion in {:.2f} seconds".format(execution_time))
+        print("Database insertion time: {:.2f} seconds".format(execution_time))
         log("comments_inserted", {
-            "amount": comments_to_insert,
+            "amount": len(processed_comments),
         })
 
 print("Starting")

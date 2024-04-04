@@ -11,12 +11,12 @@ axiom_dataset = "stonkes_workers"
 
 hostname = socket.gethostname()
 
-comments_processing_workers = 6
-comments_gathering_workers = 2
+comments_processing_workers = 30
+comments_gathering_workers = 6
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--subreddits", nargs="+")
 args = parser.parse_args()
-subreddits = vars(args)['subreddits']
+subreddits = ['wallstreetbets', 'stocks', 'investing']# vars(args)['subreddits']
 
 db_batch_insert_size=1000

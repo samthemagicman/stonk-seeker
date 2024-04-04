@@ -5,14 +5,14 @@ FROM python:3.11-slim
 WORKDIR /usr/src/app
 
 # Add the current directory contents into the container at /app
-COPY . .
+COPY ./v1/ .
 
 # RUN apt-get update && apt-get upgrade -y && apt-get install rsync -y
 
 # RUN chmod +x ./v1/install_dependencies.sh && ./v1/install_dependencies.sh
-RUN pip install pika psycopg psycopg-binary praw cachier spacy axiom-py
+RUN pip install pika psycopg[binary] asyncpg praw diskcache spacy axiom-py asyncpraw
 RUN python -m spacy download en_core_web_sm
-CMD ["python", "-u", "./v1/main.py"]
+CMD ["python", "-u", "./main.py"]
 
 # RUN chmod +x install.sh && ./install.sh
 

@@ -54,6 +54,7 @@ CREATE OR REPLACE PROCEDURE insert_post_comment_and_mentions(
     IN p_subreddit_id TEXT,
     IN p_post_id TEXT,
     IN p_comment_id TEXT,
+    IN p_timestamp TIMESTAMPTZ,
     IN p_body TEXT,
     IN p_permalink TEXT,
     IN p_symbols TEXT[],
@@ -72,7 +73,7 @@ BEGIN
     -- Attempt to insert the comment along with the post
     BEGIN
         INSERT INTO public.comments (id, post_id, body, permalink, created_at)
-        VALUES (p_comment_id, p_post_id, p_body, p_permalink, NOW());
+        VALUES (p_comment_id, p_post_id, p_body, p_permalink, p_timestamp);
 
         comment_inserted := TRUE;
 

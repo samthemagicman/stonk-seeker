@@ -50,6 +50,7 @@ def get_stock_info(symbol_to_check):
         # print("Cache hit")
         return sym, name
     else:
+        print("Cache miss")
         log("symbol_cache", {"symbol": symbol_to_check, "cache_hit": False})
     response = urllib3.request("GET", f'https://query2.finance.yahoo.com/v1/finance/search?q={symbol_to_check}')
     content = response.data
@@ -89,7 +90,7 @@ def process_comment(comment, subreddit_id, submission_id):
         symbols, names = get_symbols_from_comment(comment.body)
         if len(symbols) > 0:  # We won't bother inserting comments that have no mentions
             processed_comments.append(
-                (subreddit_id, submission_id, comment.id, comment.body, comment.permalink, symbols, names))
+                (subreddit_id, submission_id, comment.id, comment.created_utc, comment.body, comment.permalink, symbols, names))
     except Exception as e:
         log("comment_failed", {
             "comment_id": comment.id,
@@ -209,7 +210,7 @@ async def start(subreddit_name):
         end_time = time.time()
         execution_time = end_time - start_time
         print("Done getting all comments in {:.2f} seconds".format(execution_time))
-        log("processed_comments", {execution_time: execution_time})
+        log("processed_comments", {"execution_time": execution_time})
 
         print(f"Inserting {comments_to_insert} comments")
         start_time = time.time()
@@ -219,11 +220,11 @@ async def start(subreddit_name):
         print("Database insertion in {:.2f} seconds".format(execution_time))
         log("comments_inserted", {
             "amount": comments_to_insert,
+            "execution_time": execution_time,
         })
 
 print("Starting")
 if __name__ == '__main__':
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
     if subreddits is None:
         print(f"Processing stocks")
         asyncio.run(start('stocks'))

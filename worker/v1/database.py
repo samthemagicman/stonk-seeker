@@ -7,12 +7,10 @@ conn_str = os.getenv("DATABASE_URL", "postgres://postgres.gijsepyttxkktikcoicg:r
 conn = psycopg.connect(conn_str)
 # Create a function that takes a list of tuples and inserts them into the database
 # The arguments to the function should be the list of tuples in the format:
-# [(comment_id, post_id, comment_body, comment_permalink, symbols, company_names), ...]
-async def create_many_mentions_data(
-        data: list[(str, str, str, str, str, list[str], list[str])]
-):
+# [(comment_id, post_id, timestamp, comment_body, comment_permalink, symbols, company_names), ...]
+async def create_many_mentions_data(data):
     conn2 = await asyncpg.connect(conn_str)
-    stm = await conn2.prepare("CALL insert_post_comment_and_mentions ($1, $2, $3, $4, $5, $6, $7)")
+    stm = await conn2.prepare("CALL insert_post_comment_and_mentions ($1, $2, $3, TO_TIMESTAMP($4), $5, $6, $7, $8)")
     await stm.executemany(data)
     # for comment in data:
     #     cur.execute("CALL insert_post_comment_and_mentions (%s, %s::text, %s::text, %s::text, %s::text, %s, %s)", comment)

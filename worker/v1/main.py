@@ -119,7 +119,7 @@ async def get_comments_from_submission_queue(queue, comment_queue):
         submission = await queue.get()
         try:
             comments = await submission.comments()
-            await comments.replace_more(limit=0)
+            await comments.replace_more(limit=None)
             comments = await comments.list()
             for comment in comments:
                 comment_queue.put_nowait((comment, submission.id))

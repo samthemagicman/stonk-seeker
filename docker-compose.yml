@@ -2,7 +2,7 @@ version: '3.9'
 
 services:
   db:
-    container_name: stockit_db
+    container_name: stonkseeker-db
     image: postgres
     environment:
       POSTGRES_USER: postgres
@@ -12,11 +12,3 @@ services:
     volumes:
       - ./backend/data:/var/lib/postgresql/data
       - ./backend/init_scripts:/docker-entrypoint-initdb.d
-  worker:
-    image: stockit_worker
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
-    volumes:
-       - ./worker:/usr/src/app
-    command: >
-      sh -c "python ./v1/main.py"

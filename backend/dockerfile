@@ -9,7 +9,7 @@ ENV POSTGRES_PASSWORD=postgres
 EXPOSE 5432
 
 # Copy initialization scripts into the image
-COPY ./init_scripts /docker-entrypoint-initdb.d
+# COPY ./init_scripts /docker-entrypoint-initdb.d
 
 # Specify the volume for persisting data
-VOLUME ["/var/lib/postgresql/data"]
+# VOLUME ["/var/lib/postgresql/data"]

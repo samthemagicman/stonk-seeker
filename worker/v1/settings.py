@@ -11,12 +11,16 @@ axiom_dataset = "stonkes_workers"
 
 hostname = socket.gethostname()
 
-comments_processing_workers = 30
-comments_gathering_workers = 6
+comments_processing_workers = 1
+comments_gathering_workers = 2
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--subreddit", type=str)
 parser.add_argument("--subreddits", nargs="+")
+parser.add_argument("--only-use-cache", type=bool)
 args = parser.parse_args()
+subreddit_to_scrape = args.subreddit
+only_use_cache = args.only_use_cache
 subreddits = ['wallstreetbets', 'stocks', 'investing']# vars(args)['subreddits']
 
 db_batch_insert_size=1000

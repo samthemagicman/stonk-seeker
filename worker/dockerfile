@@ -12,7 +12,7 @@ COPY ./v1/ .
 # RUN chmod +x ./v1/install_dependencies.sh && ./v1/install_dependencies.sh
 RUN pip install pika psycopg[binary] asyncpg praw diskcache spacy axiom-py asyncpraw
 RUN python -m spacy download en_core_web_sm
-CMD ["python", "-u", "./main.py"]
+CMD ["python", "-u", "./start.py"]
 
 # RUN chmod +x install.sh && ./install.sh
 

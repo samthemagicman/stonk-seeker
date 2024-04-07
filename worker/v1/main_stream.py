@@ -11,6 +11,8 @@ import concurrent.futures
 import axiom
 import asyncio
 import settings
+import praw
+from praw.models import Subreddit
 from settings import comments_gathering_workers, comments_processing_workers, hostname, subreddits
 
 cache = Cache(directory=settings.cache_location)
@@ -23,16 +25,13 @@ log_client = axiom.Client(settings.axiom_client_id, settings.axiom_org_id)
 
 processed_comments = []
 num_processed = 0
-total_submissions_processed = 0
-current_subreddit = None
 nlp = spacy.load("en_core_web_sm")
 pool = concurrent.futures.ThreadPoolExecutor()
 
 
-def log(event_name: str, events: dict, level="info"):
+def log(event_name: str, events: dict):
     events["type"] = event_name
     events["host"] = hostname
-    events["level"] = level
     log_client.ingest_events(dataset=settings.axiom_dataset, events=[events])
 
 
@@ -122,7 +121,6 @@ def process_comments(comments, subreddit_id, submission_id):
 
 
 async def get_comments_from_submission_queue(queue, comment_queue):
-    global total_submissions_processed
     while True:
         submission = await queue.get()
         try:
@@ -137,7 +135,6 @@ async def get_comments_from_submission_queue(queue, comment_queue):
                     comments.extend(more_comments)
                 else:
                     comment_queue.put_nowait((comment, submission.id))
-            total_submissions_processed += 1
             # print(f"Got {len(comments)} comments")
             # queue.put(comments)
         except Exception as e:
@@ -172,21 +169,12 @@ async def process_comment_queue(comment_queue, subreddit_id, loop):
 
 async def print_state(comment_queue, queue):
     global num_processed
-    global total_submissions_processed
     while True:
         print(f"Submissions left {queue.qsize()}")
         print(f"Comments left: {comment_queue.qsize()}")
         print(f"Processed comments: {len(processed_comments)}")
         print(f"Total processed: {num_processed}")
-        log("state", {
-            "subreddit": current_subreddit,
-            "submissions_left_to_process": queue.qsize(),
-            "comments_left_to_process": comment_queue.qsize(),
-            "comments_with_mentions": len(processed_comments),
-            "total_comments_processed": num_processed,
-            "total_submissions_processed": total_submissions_processed,
-        })
-        await asyncio.sleep(5)
+        await asyncio.sleep(0.5)
 
 
 def create_workers(comment_queue, queue, subreddit_id, loop):
@@ -208,7 +196,7 @@ def cancel_tasks(*args):
 
 async def insert_comments_to_db(comments: List[str]):
     print(f"Inserting {len(comments)} comments to db")
-    log("comments_inserted", {"amount": len(comments)})
+    log("inserting_comments", {"num_comments": len(comments)})
     await database.create_many_mentions_data(comments)
 
 
@@ -217,66 +205,36 @@ async def bulk_insert_comments():
     for i in range(0, num_comments, settings.db_batch_insert_size):
         batch = processed_comments[i:i + settings.db_batch_insert_size]
         await database.create_many_mentions_data(batch)
-    log("comments_inserted", {"amount": num_comments})
     processed_comments.clear()
 
 
 async def start(subreddit_name):
     loop = asyncio.get_running_loop()
     log("started", {})
-    async with asyncpraw.Reddit(client_id="SZj3fjzqYfaKSBOHqDYs3w", client_secret="ZnuAV4Q9lJsZYwD9Xxq18-PhBXaQAg", user_agent="scrape") as reddit:
-        subreddit = await reddit.subreddit(subreddit_name, fetch=True)
-        subreddit_id = database.create_subreddit(subreddit.id, subreddit_name)
+    reddit = praw.Reddit(client_id="SZj3fjzqYfaKSBOHqDYs3w", client_secret="ZnuAV4Q9lJsZYwD9Xxq18-PhBXaQAg", user_agent="scrape")
+    subreddit: Subreddit = reddit.subreddit(subreddit_name)
+    subreddit_id = database.create_subreddit(subreddit.id, subreddit_name)
 
-        submission: asyncpraw.reddit.Submission
+    submission: asyncpraw.reddit.Submission
 
-        queue = asyncio.Queue()
-        comment_queue = asyncio.Queue()
-        get_comments_tasks, process_comments_tasks = create_workers(comment_queue, queue, subreddit_id, loop)
+    queue = asyncio.Queue()
+    comment_queue = asyncio.Queue()
+    get_comments_tasks, process_comments_tasks = create_workers(comment_queue, queue, subreddit_id, loop)
+    state_task = asyncio.create_task(print_state(comment_queue, queue))
 
-        print("Queueing submissions")
-        start_time = time.time()
-        
-        async for submission in subreddit.hot(limit=1000):
-            queue.put_nowait(submission)
-        print("Processing comments")
-        state_task = asyncio.create_task(print_state(comment_queue, queue))
-        await queue.join()
-        await comment_queue.join()
+    for comment in subreddit.stream.comments():
+        try:
+            comment_queue.put_nowait(comment)
+        except Exception as e:
+            print(f"Exception occurred in main loop: {e}")
 
-        cancel_tasks(*get_comments_tasks, *process_comments_tasks, state_task)
-
-        comments_to_insert = len(processed_comments)
-        end_time = time.time()
-        execution_time = end_time - start_time
-        print("Done getting all comments in {:.2f} seconds".format(execution_time))
-        log("processed_comments", {"execution_time": execution_time})
-
-        print(f"Inserting {comments_to_insert} comments")
-        start_time = time.time()
-        await bulk_insert_comments()
-        end_time = time.time()
-        execution_time = end_time - start_time
-        print("Database insertion in {:.2f} seconds".format(execution_time))
 
 print("Starting")
 if __name__ == '__main__':
-    try:
-        start_time = time.time()
-        if settings.subreddit_to_scrape is not None:
-            current_subreddit = settings.subreddit_to_scrape
-            asyncio.run(start(settings.subreddit_to_scrape))
-        elif subreddits is None:
-            asyncio.run(start('stocks'))
-        else:
-            for subreddit in subreddits:
-                current_subreddit = subreddit
-                print(f"Processing {subreddit}")
-                # asyncio.run(start(subreddit))
-        end_time = time.time()
-        execution_time = end_time - start_time
-        log("processed_all", {"execution_time": execution_time})
-    except Exception as e:
-        log("exited", {"error": e}, "error")
-        print(f"An error occurred: {e}")
-    exit(0)
+    if subreddits is None:
+        print(f"Processing stocks")
+        asyncio.run(start('stocks'))
+    else:
+        for subreddit in subreddits:
+            print(f"Processing {subreddit}")
+            asyncio.run(start(subreddit))

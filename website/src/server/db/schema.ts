@@ -21,7 +21,7 @@ export const createTable = pgTableCreator((name) => name);
 
 export const subreddits = createTable("subreddits", {
   id: text("id").primaryKey(),
-  name: text("name").unique(),
+  name: text("name").unique().notNull(),
 });
 
 export const posts = createTable("posts", {

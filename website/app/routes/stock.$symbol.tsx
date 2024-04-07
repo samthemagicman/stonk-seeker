@@ -26,6 +26,7 @@ export async function loader({ params }: LoaderFunctionArgs) {
   if (!symbol) {
     return redirect("/");
   }
+  symbol = symbol.toUpperCase();
   const symbolExists = await db
     .selectFrom("stock_mentions")
     .where("symbol", "=", symbol)
@@ -38,7 +39,6 @@ export async function loader({ params }: LoaderFunctionArgs) {
     });
   }
 
-  symbol = symbol.toUpperCase();
   const data = await db
     .selectFrom("comments")
     .innerJoin("stock_mentions", "stock_mentions.comment_id", "comments.id")

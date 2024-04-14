@@ -1,10 +1,14 @@
 import * as React from "react";
-export function StonkSeekerLogo(props: React.SVGAttributes<SVGElement>) {
+import { cn } from "../_lib/utils";
+export function StonkSeekerLogo({
+  className,
+  ...props
+}: React.SVGAttributes<SVGElement>) {
   return (
     <svg
       viewBox="0 0 536.9499 221.4531"
       height={100}
-      className="fill-black dark:fill-white"
+      className={cn("fill-black dark:fill-white", className)}
       preserveAspectRatio="none"
       {...props}
     >

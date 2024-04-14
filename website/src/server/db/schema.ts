@@ -38,6 +38,9 @@ export const comments = createTable("comments", {
     onDelete: "cascade",
   }),
   body: text("body"),
+  createdAt: timestamp("created_at", { withTimezone: true }).default(
+    sql`now()`,
+  ),
 });
 
 export const stockMentions = createTable("stock_mentions", {
@@ -47,7 +50,7 @@ export const stockMentions = createTable("stock_mentions", {
   }),
   symbol: text("symbol"),
   companyName: text("company_name"),
-  created_at: timestamp("created_at", { withTimezone: true }).default(
+  createdAt: timestamp("created_at", { withTimezone: true }).default(
     sql`now()`,
   ),
 });

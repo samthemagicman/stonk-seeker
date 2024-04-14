@@ -18,7 +18,7 @@ export function Navbar() {
         <NavigationMenuList>
           <NavigationMenuItem>
             <Link href="/">
-              <StonkSeekerLogo height={60} />
+              <StonkSeekerLogo className="h-12 sm:h-14" />
             </Link>
           </NavigationMenuItem>
         </NavigationMenuList>

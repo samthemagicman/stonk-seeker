@@ -46,7 +46,7 @@ export async function TopStocksTable() {
       <TableBody>
         {stocks.map((stock, index) => (
           <TableRow key={stock.symbol}>
-            <TableCell>{index}</TableCell>
+            <TableCell>{index + 1}</TableCell>
             <Link
               href={`/stock/${stock.symbol}`}
               className="block hover:underline"

@@ -1,6 +1,6 @@
 import { cache } from "react";
-import * as db from "~/server/db";
 import "server-only";
+import * as db from "~/server/db";
 import {
   Table,
   TableBody,
@@ -47,12 +47,14 @@ export async function TopStocksTable() {
         {stocks.map((stock, index) => (
           <TableRow key={stock.symbol}>
             <TableCell>{index + 1}</TableCell>
-            <Link
-              href={`/stock/${stock.symbol}`}
-              className="block hover:underline"
-            >
-              <TableCell>{stock.companyName}</TableCell>
-            </Link>
+            <TableCell>
+              <Link
+                href={`/stock/${stock.symbol}`}
+                className="block hover:underline"
+              >
+                {stock.companyName}
+              </Link>
+            </TableCell>
             <TableCell className="font-medium">{stock.symbol}</TableCell>
             <TableCell>{stock.mentionCount}</TableCell>
             <TableCell>

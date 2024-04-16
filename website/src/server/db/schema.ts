@@ -37,7 +37,7 @@ export const comments = createTable("comments", {
   postId: text("post_id").references(() => posts.id, {
     onDelete: "cascade",
   }),
-  body: text("body"),
+  body: text("body").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).default(
     sql`now()`,
   ),
